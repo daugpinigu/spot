@@ -379,7 +379,7 @@ function renderKPIs(c) {
     kpi('Portfelio vertė', money(c.total, 0), c.missing ? h('span', { class: 'neg', text: `${c.missing} poz. be kainos` }) : `${c.rows.length} eilutės · USD`),
     kpi('Investuota suma', money(c.dep, 0), gain != null ? [h('span', { class: cls(gain), text: `${money(gain, 0, true)} (${pct(gainPct, 1, true)})` }), ' vs įnašus'] : 'įnašų dar nėra'),
     kpi('Nerealizuotas P/L', h('span', { class: cls(c.plSum), text: money(c.plSum, 0, true) }), `${pct(c.costSum ? c.plSum / c.costSum * 100 : null, 1, true)} nuo ${money(c.costSum, 0)} pozicijose`),
-    kpi('Šiandien', h('span', { class: cls(c.daySum), text: c.dayKnown ? money(c.daySum, 0, true) : '–' }), c.dayKnown ? `${pct((c.total - c.daySum) ? c.daySum / (c.total - c.daySum) * 100 : null, 2, true)} · akcijos vs vakar, crypto 24h` : 'laukiama kainų'),
+    kpi('Šiandien', h('span', { class: cls(c.daySum), text: c.dayKnown ? money(c.daySum, 0, true) : '–' }), c.dayKnown ? `${pct((c.total - c.daySum) ? c.daySum / (c.total - c.daySum) * 100 : null, 2, true)} · vs vakar · crypto 24h` : 'laukiama kainų'),
     kpi('Cash', money(c.cash, 0), `${pct(c.total ? c.cash / c.total * 100 : null, 1)} portfelio`),
   );
 }
@@ -409,11 +409,11 @@ function renderCenter() {
 }
 function showTip(s, ev) {
   const total = state._total; const tip = $('#tip'); const wrap = $('#donut');
-  tip.replaceChildren(
+  tip.replaceChildren(...[
     h('div', { class: 'tv', text: money(s.value, 2) }),
     h('div', { class: 'tl' }, h('span', { class: 'k', style: `background:${s.color}` }), `${s.name} · ${pct(total ? s.value / total * 100 : 0, 2)}`),
     s.other ? h('div', { class: 'tl', text: s.other.slice(0, 12).join(', ') + (s.other.length > 12 ? '…' : '') }) : null,
-  );
+  ].filter(Boolean));
   tip.style.display = 'block';
   const b = wrap.getBoundingClientRect();
   let x = (ev && ev.clientX != null) ? ev.clientX - b.left + 14 : b.width / 2 - 75;
