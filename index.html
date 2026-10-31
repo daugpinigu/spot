@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="dark">
+<title>Spot portfelis</title>
+<style>
+:root{--bg:#0b1729;--card:#0f1f36;--line:#1a2d4a;--line2:#223a5c;--text:#e6edf6;--text2:#b7c4d4;--muted:#6b8197;--accent:#2dd4bf;--pos:#2dd4bf;--neg:#ef6a6a;--warn:#f5c04a;--chip:#14253e;--radius:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 16px 48px}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px;margin-bottom:18px}
+.eyebrow{color:var(--accent);font-size:11px;letter-spacing:3px;text-transform:uppercase;font-weight:700}
+h1{font-size:28px;font-weight:800;letter-spacing:-.5px;line-height:1.1}
+.title{display:flex;flex-direction:column;gap:5px;margin-right:auto;min-width:0}
+.status{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-top:2px}
+.live{display:inline-flex;align-items:center;gap:7px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite;flex:none}
+.dot.err{background:var(--neg);animation:none}.dot.idle{background:var(--muted);animation:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(45,212,191,.55)}70%{box-shadow:0 0 0 7px rgba(45,212,191,0)}100%{box-shadow:0 0 0 0 rgba(45,212,191,0)}}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:11.5px;color:var(--text2);white-space:nowrap}
+.chip i{width:7px;height:7px;border-radius:50%;background:var(--muted);display:inline-block}
+.chip.open i{background:var(--pos)}.chip.ext i{background:var(--warn)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{appearance:none;border:1px solid var(--line2);background:var(--chip);color:var(--text);border-radius:8px;padding:8px 12px;font-size:13px;font-weight:600;cursor:pointer;line-height:1;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-family:inherit}
+.btn:hover{border-color:var(--accent)}.btn.primary{background:var(--accent);color:#06251f;border-color:var(--accent)}.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{color:var(--neg);border-color:rgba(239,106,106,.4)}.btn.sm{padding:6px 9px;font-size:12px}.btn.on{border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:default}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;min-width:0}
+.kpi .l{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1.2px;font-weight:600;margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi .v{font-size:24px;font-weight:800;letter-spacing:-.5px;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi .s{color:var(--muted);font-size:12px;margin-top:7px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pos{color:var(--pos)}.neg{color:var(--neg)}.mut{color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:14px}
+.card-h{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px}
+.card-h h2{font-size:13px;text-transform:uppercase;letter-spacing:1.6px;color:var(--muted);font-weight:700;margin-right:auto}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:8px;overflow:hidden}
+.seg button{appearance:none;border:0;background:transparent;color:var(--muted);padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+.seg button.on{background:var(--chip);color:var(--text)}
+.alloc{display:grid;grid-template-columns:280px 1fr;gap:28px;align-items:center}
+.donut-wrap{position:relative;width:280px;height:280px;margin:0 auto}
+.donut-wrap svg{width:100%;height:100%;display:block;overflow:visible}
+.donut-wrap path{fill:none;stroke-width:30;cursor:pointer;transition:opacity .15s,stroke-width .15s;outline:none}
+.donut-wrap.hover path,.donut-wrap.hl path{opacity:.35}
+.donut-wrap.hover path.on,.donut-wrap.hl path.on{opacity:1;stroke-width:36}
+.donut-wrap path:focus-visible{stroke-width:36;opacity:1}
+.center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;text-align:center;padding:0 58px}
+.center .b{font-size:24px;font-weight:800;letter-spacing:-.5px;font-variant-numeric:tabular-nums;line-height:1.1}
+.center .s{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.1px;margin-top:6px;line-height:1.4}
+.tip{position:absolute;z-index:5;background:#060f1d;border:1px solid var(--line2);border-radius:8px;padding:8px 10px;font-size:12px;pointer-events:none;display:none;min-width:150px;max-width:230px;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+.tip .tv{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}.tip .tl{color:var(--muted);display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap}
+.tip .k{display:inline-block;width:12px;height:3px;border-radius:2px;flex:none}
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:4px 18px;min-width:0}
+.leg{display:grid;grid-template-columns:12px 1fr auto auto;align-items:center;gap:10px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:13px;border:1px solid transparent}
+.leg:hover{background:rgba(255,255,255,.04)}.leg.on{background:rgba(45,212,191,.08);border-color:rgba(45,212,191,.35)}
+.leg .k{width:12px;height:12px;border-radius:3px}.leg .n{color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.leg .p{font-weight:700;font-variant-numeric:tabular-nums}.leg .v{color:var(--muted);font-variant-numeric:tabular-nums;font-size:12px}
+.twrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -18px;padding:0 18px}
+table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums;min-width:900px}
+th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;font-weight:600;text-align:right;padding:8px 10px;border-bottom:1px solid var(--line2);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;vertical-align:middle}
+th:first-child,td:first-child{text-align:left}th.note,td.note{text-align:left}
+td.note{color:var(--muted);white-space:normal;min-width:120px;max-width:240px;font-size:12px}
+tr.hl td{background:rgba(45,212,191,.09)}tr.flag td{background:rgba(245,192,74,.10)}tr.dim td{opacity:.35}
+.tk{font-weight:700;display:flex;align-items:center;gap:8px}.tk .k{width:8px;height:8px;border-radius:50%;flex:none}
+.nm{color:var(--muted);font-size:11px;font-weight:400;max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-left:16px}
+.sub{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+.badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:4px;background:var(--chip);color:var(--muted);border:1px solid var(--line);font-weight:600;letter-spacing:.3px;vertical-align:middle}
+tfoot td{font-weight:700;border-top:1px solid var(--line2);border-bottom:0;background:rgba(255,255,255,.02)}
+.acts{display:inline-flex;gap:4px}
+.ib{appearance:none;border:1px solid var(--line2);background:transparent;color:var(--text2);border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:13px;line-height:1;font-family:inherit}
+.ib:hover{border-color:var(--accent);color:var(--accent)}.ib.del:hover{border-color:var(--neg);color:var(--neg)}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 12px;background:rgba(45,212,191,.06);border:1px dashed rgba(45,212,191,.35);border-radius:8px;margin-bottom:12px;font-size:12px;color:var(--text2)}
+.hidden{display:none!important}
+.overlay{position:fixed;inset:0;background:rgba(3,8,18,.72);display:flex;align-items:flex-start;justify-content:center;padding:6vh 16px;z-index:50;overflow:auto}
+.modal{background:var(--card);border:1px solid var(--line2);border-radius:12px;width:100%;max-width:540px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.modal h3{font-size:17px;font-weight:800;margin-bottom:14px}
+.f{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;min-width:0}.f label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:600}
+.f input,.f select,.f textarea{appearance:none;background:#0a1628;border:1px solid var(--line2);color:var(--text);border-radius:8px;padding:9px 10px;font-size:14px;font-family:inherit;width:100%;min-width:0}
+.f input:focus,.f select:focus{outline:none;border-color:var(--accent)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.row3{display:grid;grid-template-columns:1fr 1fr;gap:10px}.rowb{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}
+.chk{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);margin-bottom:12px;cursor:pointer}.chk input{width:16px;height:16px;accent-color:var(--accent);flex:none}
+.hint{font-size:12px;color:var(--muted);line-height:1.55}.hint a{color:var(--accent)}.hint ol{padding-left:18px;margin:6px 0}.hint p{margin:4px 0}
+.m-acts{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;flex-wrap:wrap}.m-acts .left{margin-right:auto}
+.res{font-size:12px;color:var(--text2);background:#0a1628;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:-4px 0 12px;min-height:34px;line-height:1.5}
+.res button{appearance:none;border:1px solid var(--line2);background:transparent;color:var(--text);border-radius:6px;padding:3px 8px;cursor:pointer;margin:2px 4px 2px 0;font-size:12px;font-family:inherit}.res button:hover{border-color:var(--accent)}
+.list{display:flex;flex-direction:column;gap:6px;max-height:55vh;overflow:auto}
+.li{display:grid;grid-template-columns:90px 1fr auto auto;gap:10px;align-items:center;font-size:13px;padding:8px 10px;background:#0a1628;border-radius:8px;border:1px solid var(--line)}
+.li .a{font-weight:700;font-variant-numeric:tabular-nums}.li .n{color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#06251f;color:#d7fff7;border:1px solid var(--accent);border-radius:10px;padding:10px 16px;font-size:13px;font-weight:600;opacity:0;transition:all .25s;z-index:60;max-width:90vw;pointer-events:none;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}#toast.err{background:#2a0f12;border-color:var(--neg);color:#ffd9d9}
+footer{color:var(--muted);font-size:11.5px;margin-top:10px;line-height:1.6}footer a{color:var(--muted)}
+.err-box{background:rgba(239,106,106,.1);border:1px solid rgba(239,106,106,.4);border-radius:8px;padding:12px 14px;color:#ffd9d9;font-size:13px;grid-column:1/-1}
+@media (max-width:980px){.kpis{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:760px){.alloc{grid-template-columns:1fr;gap:16px}.legend{grid-template-columns:1fr}.donut-wrap{width:240px;height:240px}}
+@media (max-width:560px){.kpis{grid-template-columns:1fr 1fr}.kpi .v{font-size:20px}h1{font-size:22px}.row2,.row3{grid-template-columns:1fr}.card{padding:14px}.twrap{margin:0 -14px;padding:0 14px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="title">
+      <span class="eyebrow">daug_pinigu</span>
+      <h1>Spot portfelis</h1>
+      <div class="status" id="status"></div>
+    </div>
+    <div class="actions">
+      <button class="btn" id="btnRefresh" title="Atnaujinti kainas dabar">&#8635; Atnaujinti</button>
+      <button class="btn" id="btnEdit">&#9998; Redaguoti</button>
+      <button class="btn" id="btnSettings" title="Nustatymai / GitHub token">&#9881;</button>
+    </div>
+  </header>
+
+  <section class="kpis" id="kpis"></section>
+
+  <section class="card">
+    <div class="card-h">
+      <h2>Alokacija</h2>
+      <button class="btn sm hidden" id="btnClearHl">&#10005; Nuimti žymėjimą</button>
+      <div class="seg" id="allocSeg"><button data-m="pos" class="on">Pozicijos</button><button data-m="type">Tipai</button></div>
+    </div>
+    <div class="alloc">
+      <div class="donut-wrap" id="donut"><div class="center" id="center"></div><div class="tip" id="tip"></div></div>
+      <div class="legend" id="legend"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-h"><h2>Pozicijos</h2><span class="mut" id="rowsInfo" style="font-size:12px"></span></div>
+    <div class="toolbar hidden" id="toolbar">
+      <button class="btn primary sm" id="btnBuy">+ Pirkimas / nauja pozicija</button>
+      <button class="btn sm" id="btnDeposit">+ Įnašas</button>
+      <button class="btn sm" id="btnDeposits">Įnašų sąrašas</button>
+      <span>Kiekvienas išsaugojimas = commit'as į data/positions.json.</span>
+    </div>
+    <div class="twrap">
+      <table id="tbl">
+        <thead><tr><th>Tickeris</th><th>Vnt</th><th>Avg kaina</th><th>Investuota</th><th>Kaina</th><th>Vertė</th><th>P/L</th><th>%</th><th class="note">Pastaba</th><th class="acts-h hidden"></th></tr></thead>
+        <tbody></tbody><tfoot></tfoot>
+      </table>
+    </div>
+  </section>
+  <footer id="foot"></footer>
+</div>
+<div id="modalRoot"></div>
+<div id="toast"></div>
+
+<script>
+'use strict';
+const CONFIG = {
+  owner: 'daugpinigu', repo: 'spot', path: 'data/positions.json', branch: 'main',
+  refreshMs: 30000,
+  quotesApi: 'https://spot-api-two.vercel.app/api/quotes',
+  coingecko: 'https://api.coingecko.com/api/v3',
+};
+const PALETTE = ['#3987e5','#d95926','#199e70','#c98500','#d55181','#008300','#9085e9','#e66767'];
+const OTHER = '#6b8197';
+const TYPE_NAMES = { stock: 'Akcijos', etf: 'ETF / ETP', crypto: 'Crypto', cash: 'Cash' };
+const TYPE_ORDER = ['stock', 'etf', 'crypto', 'cash'];
+
+const state = {
+  data: null, sha: null, source: null,
+  quotes: {}, quoteErrors: {}, lastQuoteAt: null, lastAttempt: 0, lastErr: null, inflight: false,
+  edit: false, allocMode: 'pos', highlight: null,
+  pat: (() => { try { return localStorage.getItem('spot.pat') || ''; } catch (e) { return ''; } })(),
+  _slices: [], _sliceColor: new Map(), _total: 0, _c: null,
+};
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+function h(tag, attrs = {}, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v == null || v === false) continue;
+    if (k === 'class') e.className = v;
+    else if (k === 'text') e.textContent = v;
+    else if (k === 'style') e.style.cssText = v;
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2).toLowerCase(), v);
+    else if (k === 'dataset') Object.assign(e.dataset, v);
+    else e.setAttribute(k, v === true ? '' : v);
+  }
+  for (const kid of kids.flat(Infinity)) {
+    if (kid == null || kid === false) continue;
+    e.append(kid instanceof Node ? kid : document.createTextNode(String(kid)));
+  }
+  return e;
+}
+const nf = d => new Intl.NumberFormat('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+function money(v, d = 2, sign = false) { if (v == null || !isFinite(v)) return '–'; const s = v < 0 ? '-' : (sign ? '+' : ''); return s + nf(d).format(Math.abs(v)) + '$'; }
+function pct(v, d = 2, sign = false) { if (v == null || !isFinite(v)) return '–'; const s = v < 0 ? '-' : (sign ? '+' : ''); return s + nf(d).format(Math.abs(v)) + '%'; }
+function price(v) { if (v == null || !isFinite(v)) return '–'; const a = Math.abs(v); const d = a >= 1 ? 2 : a >= 0.01 ? 4 : 6; return nf(d).format(v) + '$'; }
+function units(u) { if (u == null || !isFinite(u)) return '–'; return new Intl.NumberFormat('en-US', { maximumFractionDigits: 8 }).format(u); }
+function cls(v) { return v > 0 ? 'pos' : v < 0 ? 'neg' : 'mut'; }
+function round(v, d) { const m = Math.pow(10, d); return Math.round(v * m) / m; }
+function num(v) { if (v == null) return NaN; const s = String(v).trim().replace(/\s/g, '').replace(',', '.'); return s === '' ? NaN : Number(s); }
+function clone(o) { return JSON.parse(JSON.stringify(o)); }
+function today() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+function slug(t) { return String(t).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'pos'; }
+function uniqueId(d, t) { const base = slug(t); let id = base, i = 2; const ids = new Set(d.positions.map(p => p.id)); while (ids.has(id)) id = base + '-' + (i++); return id; }
+function sumDep(d) { return (d.deposits || []).reduce((s, x) => s + (+x.amount || 0), 0); }
+function apiUrl() { const q = state.data && state.data.quotesApi; return (q && !q.includes('PLACEHOLDER')) ? q : CONFIG.quotesApi; }
+function fmtTime(ms) { return new Date(ms).toLocaleTimeString('lt-LT', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); }
+let toastT;
+function toast(msg, err) { const t = $('#toast'); t.textContent = msg; t.className = 'show' + (err ? ' err' : ''); clearTimeout(toastT); toastT = setTimeout(() => { t.className = ''; }, err ? 7000 : 3500); }
+
+/* ---------- GitHub (duomenys) ---------- */
+function ghUrl() { return `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`; }
+function ghHeaders() { const hd = { 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' }; if (state.pat) hd['Authorization'] = 'Bearer ' + state.pat; return hd; }
+function b64dec(s) { const bin = atob(s.replace(/\s/g, '')); const bytes = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i); return new TextDecoder().decode(bytes); }
+function b64enc(str) { const bytes = new TextEncoder().encode(str); let bin = ''; for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(bin); }
+async function ghGet() {
+  const r = await fetch(`${ghUrl()}?ref=${encodeURIComponent(CONFIG.branch)}&t=${Date.now()}`, { headers: ghHeaders(), cache: 'no-store' });
+  if (!r.ok) throw new Error('GitHub HTTP ' + r.status);
+  const j = await r.json();
+  return { sha: j.sha, data: JSON.parse(b64dec(j.content)) };
+}
+function normalize(d) {
+  d.positions = d.positions || []; d.deposits = d.deposits || [];
+  for (const p of d.positions) { if (!p.id) p.id = uniqueId({ positions: d.positions.filter(x => x !== p && x.id) }, p.ticker || 'pos'); if (!p.type) p.type = p.coingecko ? 'crypto' : (p.value != null && p.units == null ? 'cash' : 'stock'); }
+  d.deposits.forEach((x, i) => { if (!x.id) x.id = 'd' + (i + 1) + '-' + slug(String(x.date || '')); });
+  return d;
+}
+async function loadPositions() {
+  try {
+    const g = await ghGet(); state.sha = g.sha; state.data = normalize(g.data); state.source = 'github';
+  } catch (e) {
+    const r = await fetch(`data/positions.json?t=${Date.now()}`, { cache: 'no-store' });
+    if (!r.ok) throw e;
+    state.data = normalize(await r.json()); state.sha = null; state.source = 'pages';
+  }
+}
+function snapshotPrices(next) {
+  for (const p of next.positions) {
+    const q = state.quotes[p.id];
+    if (p.type !== 'cash' && q && q.price != null) { p.lastPrice = q.price; p.lastPriceAt = new Date((q.time ? q.time * 1000 : Date.now())).toISOString(); }
+  }
+}
+async function saveData(next, message) {
+  if (!state.pat) {
+    const ok = await modalSettings(true);
+    if (!ok || !state.pat) throw new Error('Nėra GitHub token - neišsaugota');
+  }
+  let cur;
+  try { cur = await ghGet(); } catch (e) { throw new Error('Nepavyko nuskaityti repo failo: ' + e.message); }
+  if (state.sha && cur.sha !== state.sha) {
+    state.data = normalize(cur.data); state.sha = cur.sha; state.source = 'github'; renderAll();
+    throw new Error('Duomenys buvo pakeisti kitame įrenginyje - perkrauta. Pakartok veiksmą.');
+  }
+  next.updated = new Date().toISOString();
+  snapshotPrices(next);
+  const body = JSON.stringify(next, null, 2) + '\n';
+  const r = await fetch(ghUrl(), { method: 'PUT', headers: { ...ghHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ message, content: b64enc(body), sha: cur.sha, branch: CONFIG.branch }) });
+  if (r.status === 401 || r.status === 403) throw new Error(`GitHub atmetė token (HTTP ${r.status}). Patikrink: repo ${CONFIG.owner}/${CONFIG.repo}, Contents = Read and write.`);
+  if (!r.ok) { let m = ''; try { m = (await r.json()).message || ''; } catch (_) {} throw new Error('GitHub HTTP ' + r.status + (m ? ': ' + m : '')); }
+  const j = await r.json();
+  state.data = next; state.sha = j.content.sha; state.source = 'github';
+  renderAll(); refreshQuotes(false);
+  return j.commit.sha;
+}
+
+/* ---------- kainos ---------- */
+async function refreshQuotes(manual) {
+  if (state.inflight || !state.data) return;
+  state.inflight = true; state.lastAttempt = Date.now();
+  const d = state.data; const errs = []; let ok = 0;
+  const stocks = d.positions.filter(p => p.type !== 'cash' && p.yahoo);
+  const crypto = d.positions.filter(p => p.type !== 'cash' && p.coingecko);
+  await Promise.all([
+    (async () => {
+      if (!stocks.length) return;
+      try {
+        const syms = [...new Set(stocks.map(p => p.yahoo.toUpperCase()))];
+        const r = await fetch(`${apiUrl()}?symbols=${encodeURIComponent(syms.join(','))}`, { cache: 'no-store' });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const j = await r.json();
+        for (const p of stocks) {
+          const s = p.yahoo.toUpperCase(); const q = j.quotes && j.quotes[s];
+          if (q && q.price != null) { state.quotes[p.id] = { src: 'yahoo', price: q.price, prev: q.prevClose, chgPct: q.changePct, time: q.time, ext: q.ext, name: q.name, exchange: q.exchange, currency: q.currency }; delete state.quoteErrors[p.id]; }
+          else state.quoteErrors[p.id] = (j.errors && j.errors[s]) || 'nėra kainos';
+        }
+        ok++;
+      } catch (e) { errs.push('Akcijos: ' + e.message); }
+    })(),
+    (async () => {
+      if (!crypto.length) return;
+      try {
+        const ids = [...new Set(crypto.map(p => p.coingecko))];
+        const r = await fetch(`${CONFIG.coingecko}/simple/price?ids=${encodeURIComponent(ids.join(','))}&vs_currencies=usd&precision=full&include_24hr_change=true&include_last_updated_at=true`, { cache: 'no-store' });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const j = await r.json();
+        for (const p of crypto) {
+          const c = j[p.coingecko];
+          if (c && c.usd != null) { state.quotes[p.id] = { src: 'coingecko', price: c.usd, chgPct: c.usd_24h_change, time: c.last_updated_at }; delete state.quoteErrors[p.id]; }
+          else state.quoteErrors[p.id] = 'CoinGecko: id nerastas';
+        }
+        ok++;
+      } catch (e) { errs.push('Crypto: ' + e.message); }
+    })(),
+  ]);
+  state.lastErr = errs.join(' · ') || null;
+  if (ok) state.lastQuoteAt = Date.now();
+  state.inflight = false;
+  renderAll();
+  if (manual) toast(errs.length ? errs.join(' · ') : 'Kainos atnaujintos', !!errs.length);
+}
+setInterval(() => {
+  if (!state.data || document.hidden) return;
+  if (Date.now() - state.lastAttempt >= CONFIG.refreshMs) refreshQuotes(false); else renderStatus();
+}, 1000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && state.data && Date.now() - state.lastAttempt > 5000) refreshQuotes(false); });
+
+/* ---------- rinkos būsena ---------- */
+function tzParts(tz) {
+  const p = new Intl.DateTimeFormat('en-US', { timeZone: tz, weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date());
+  const g = k => (p.find(x => x.type === k) || {}).value;
+  return { wd: g('weekday'), min: (parseInt(g('hour'), 10) % 24) * 60 + parseInt(g('minute'), 10) };
+}
+function usStatus() { const { wd, min } = tzParts('America/New_York'); if (wd === 'Sat' || wd === 'Sun') return 'uždaryta'; if (min >= 570 && min < 960) return 'atvira'; if (min >= 240 && min < 570) return 'pre-market'; if (min >= 960 && min < 1200) return 'after-hours'; return 'uždaryta'; }
+function euStatus() { const l = tzParts('Europe/London'), b = tzParts('Europe/Berlin'); const wk = w => w !== 'Sat' && w !== 'Sun'; const lse = wk(l.wd) && l.min >= 480 && l.min < 990; const xet = wk(b.wd) && b.min >= 540 && b.min < 1050; return (lse || xet) ? 'atvira' : 'uždaryta'; }
+function extLabel(q) { const f = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' }); return f.format(new Date(q.ext.time * 1000)) > f.format(new Date(q.time * 1000)) ? 'Pre' : 'AH'; }
+
+/* ---------- skaičiavimai ---------- */
+function compute() {
+  const d = state.data; const out = [];
+  for (const p of d.positions) {
+    const q = state.quotes[p.id]; let pr = null, stale = false;
+    if (p.type !== 'cash') { if (q) pr = q.price; else if (p.lastPrice != null) { pr = p.lastPrice; stale = true; } }
+    const value = p.type === 'cash' ? (+p.value || 0) : (pr != null ? p.units * pr : null);
+    const cost = p.type === 'cash' ? null : (+p.cost || 0);
+    const avg = (p.type !== 'cash' && p.units) ? cost / p.units : null;
+    const pl = (value != null && cost != null) ? value - cost : null;
+    const plPct = (pl != null && cost) ? pl / cost * 100 : null;
+    let day = null;
+    if (p.type !== 'cash' && q && !stale && value != null) {
+      if (q.src === 'yahoo' && q.prev != null) day = p.units * (q.price - q.prev);
+      else if (q.src === 'coingecko' && q.chgPct != null) day = value - value / (1 + q.chgPct / 100);
+    }
+    out.push({ p, q, pr, stale, value, cost, avg, pl, plPct, day });
+  }
+  const total = out.reduce((s, r) => s + (r.value || 0), 0);
+  for (const r of out) r.pct = total ? (r.value || 0) / total * 100 : 0;
+  out.sort((a, b) => (b.value || 0) - (a.value || 0));
+  return {
+    rows: out, total,
+    dep: sumDep(d),
+    costSum: out.reduce((s, r) => s + (r.cost || 0), 0),
+    plSum: out.reduce((s, r) => s + (r.pl || 0), 0),
+    daySum: out.reduce((s, r) => s + (r.day || 0), 0),
+    dayKnown: out.some(r => r.day != null),
+    cash: out.filter(r => r.p.type === 'cash').reduce((s, r) => s + (r.value || 0), 0),
+    missing: out.filter(r => r.p.type !== 'cash' && r.value == null).length,
+  };
+}
+
+/* ---------- render ---------- */
+function renderAll() { if (!state.data) return; const c = compute(); state._c = c; renderStatus(); renderKPIs(c); renderDonut(c); renderTable(c); renderFoot(); }
+
+function chip(label, status) {
+  const open = status === 'atvira' || status === '24/7'; const ext = status === 'pre-market' || status === 'after-hours';
+  return h('span', { class: 'chip' + (open ? ' open' : ext ? ' ext' : '') }, h('i'), `${label}: ${status}`);
+}
+function renderStatus() {
+  const st = $('#status'); st.replaceChildren();
+  const dot = h('span', { class: 'dot ' + (state.lastErr ? 'err' : (state.lastQuoteAt ? '' : 'idle')) });
+  let t = 'Kraunama kainas…';
+  if (state.lastQuoteAt) { const ago = Math.max(0, Math.round((Date.now() - state.lastQuoteAt) / 1000)); t = `Atnaujinta ${fmtTime(state.lastQuoteAt)} (prieš ${ago} s) · kas ${CONFIG.refreshMs / 1000} s`; }
+  st.append(h('span', { class: 'live' }, dot, h('span', { text: t })));
+  st.append(chip('US', usStatus()), chip('LSE/Xetra', euStatus()), chip('Crypto', '24/7'));
+  if (state.lastErr) st.append(h('span', { class: 'neg', text: state.lastErr }));
+  if (state.source === 'pages') st.append(h('span', { class: 'mut', text: 'duomenys iš Pages kopijos (GitHub API nepasiekiamas)' }));
+}
+function kpi(label, value, sub) { return h('div', { class: 'kpi' }, h('div', { class: 'l', text: label }), h('div', { class: 'v' }, value), h('div', { class: 's' }, sub)); }
+function renderKPIs(c) {
+  const k = $('#kpis'); k.replaceChildren();
+  const gain = c.dep ? c.total - c.dep : null; const gainPct = c.dep ? gain / c.dep * 100 : null;
+  k.append(
+    kpi('Portfelio vertė', money(c.total, 0), c.missing ? h('span', { class: 'neg', text: `${c.missing} poz. be kainos` }) : `${c.rows.length} eilutės · USD`),
+    kpi('Investuota suma', money(c.dep, 0), gain != null ? [h('span', { class: cls(gain), text: `${money(gain, 0, true)} (${pct(gainPct, 1, true)})` }), ' vs įnašus'] : 'įnašų dar nėra'),
+    kpi('Nerealizuotas P/L', h('span', { class: cls(c.plSum), text: money(c.plSum, 0, true) }), `${pct(c.costSum ? c.plSum / c.costSum * 100 : null, 1, true)} nuo ${money(c.costSum, 0)} pozicijose`),
+    kpi('Šiandien', h('span', { class: cls(c.daySum), text: c.dayKnown ? money(c.daySum, 0, true) : '–' }), c.dayKnown ? `${pct((c.total - c.daySum) ? c.daySum / (c.total - c.daySum) * 100 : null, 2, true)} · akcijos vs vakar, crypto 24h` : 'laukiama kainų'),
+    kpi('Cash', money(c.cash, 0), `${pct(c.total ? c.cash / c.total * 100 : null, 1)} portfelio`),
+  );
+}
+
+function slices(c) {
+  const live = c.rows.filter(r => (r.value || 0) > 0);
+  if (state.allocMode === 'type') {
+    const g = {};
+    for (const r of live) { const t = r.p.type || 'stock'; g[t] = g[t] || { key: 'type:' + t, name: TYPE_NAMES[t] || t, value: 0, ids: [] }; g[t].value += r.value; g[t].ids.push(r.p.id); }
+    return TYPE_ORDER.filter(t => g[t]).map((t) => ({ ...g[t], color: PALETTE[TYPE_ORDER.indexOf(t)] }));
+  }
+  const sorted = [...live].sort((a, b) => b.value - a.value);
+  const top = sorted.slice(0, 8), rest = sorted.slice(8);
+  const idx = new Map(state.data.positions.map((p, i) => [p.id, i]));
+  const stable = [...top].sort((a, b) => idx.get(a.p.id) - idx.get(b.p.id));
+  const colorOf = new Map(stable.map((r, i) => [r.p.id, PALETTE[i]]));
+  const out = top.map(r => ({ key: r.p.id, name: r.p.ticker, value: r.value, ids: [r.p.id], color: colorOf.get(r.p.id) }));
+  if (rest.length) out.push({ key: '__other', name: `Kiti (${rest.length})`, value: rest.reduce((s, r) => s + r.value, 0), ids: rest.map(r => r.p.id), color: OTHER, other: rest.map(r => r.p.ticker) });
+  return out;
+}
+function setCenter(big, small) { $('#center').replaceChildren(h('div', { class: 'b', text: big }), h('div', { class: 's', text: small })); }
+function renderCenter() {
+  const S = state._slices, total = state._total;
+  const s = state.highlight && S.find(x => x.key === state.highlight);
+  if (s) setCenter(money(s.value, 0), `${s.name} · ${pct(total ? s.value / total * 100 : 0, 1)}`);
+  else setCenter(money(total, 0), 'portfelio vertė');
+}
+function showTip(s, ev) {
+  const total = state._total; const tip = $('#tip'); const wrap = $('#donut');
+  tip.replaceChildren(
+    h('div', { class: 'tv', text: money(s.value, 2) }),
+    h('div', { class: 'tl' }, h('span', { class: 'k', style: `background:${s.color}` }), `${s.name} · ${pct(total ? s.value / total * 100 : 0, 2)}`),
+    s.other ? h('div', { class: 'tl', text: s.other.slice(0, 12).join(', ') + (s.other.length > 12 ? '…' : '') }) : null,
+  );
+  tip.style.display = 'block';
+  const b = wrap.getBoundingClientRect();
+  let x = (ev && ev.clientX != null) ? ev.clientX - b.left + 14 : b.width / 2 - 75;
+  let y = (ev && ev.clientY != null) ? ev.clientY - b.top + 14 : 8;
+  x = Math.max(0, Math.min(x, b.width - tip.offsetWidth)); y = Math.max(0, Math.min(y, b.height - tip.offsetHeight));
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  setCenter(money(s.value, 0), `${s.name} · ${pct(total ? s.value / total * 100 : 0, 1)}`);
+}
+function focusSlice(key, ev, withTip) {
+  const wrap = $('#donut'); const s = state._slices.find(x => x.key === key); if (!s) return;
+  wrap.classList.add('hover');
+  wrap.querySelectorAll('path').forEach(p => p.classList.toggle('on', p.dataset.key === key));
+  if (withTip) showTip(s, ev); else setCenter(money(s.value, 0), `${s.name} · ${pct(state._total ? s.value / state._total * 100 : 0, 1)}`);
+}
+function hideTip() {
+  const wrap = $('#donut'); wrap.classList.remove('hover'); $('#tip').style.display = 'none';
+  wrap.querySelectorAll('path').forEach(p => p.classList.toggle('on', p.dataset.key === state.highlight));
+  renderCenter();
+}
+function toggleHl(key) { state.highlight = state.highlight === key ? null : key; renderAll(); }
+function renderDonut(c) {
+  const wrap = $('#donut'); const old = wrap.querySelector('svg'); if (old) old.remove();
+  const S = slices(c); const total = S.reduce((s, x) => s + x.value, 0);
+  state._slices = S; state._total = total;
+  state._sliceColor = new Map(); for (const s of S) for (const id of s.ids) state._sliceColor.set(id, s.color);
+  if (state.highlight && !S.find(x => x.key === state.highlight)) state.highlight = null;
+  wrap.classList.toggle('hl', !!state.highlight);
+  $('#btnClearHl').classList.toggle('hidden', !state.highlight);
+  const NS = 'http://www.w3.org/2000/svg'; const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', '0 0 280 280'); svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', 'Portfelio alokacija');
+  const cx = 140, cy = 140, r = 115; const gap = 2 / r; let a = -Math.PI / 2;
+  for (const s of S) {
+    const ang = total ? s.value / total * 2 * Math.PI : 0; if (ang <= 0) continue;
+    const g = ang > gap * 3 ? gap / 2 : 0; const a0 = a + g, a1 = a + ang - g;
+    const path = document.createElementNS(NS, 'path'); let d;
+    if (ang >= 2 * Math.PI - 1e-6) d = `M ${cx + r} ${cy} A ${r} ${r} 0 1 1 ${cx - r} ${cy} A ${r} ${r} 0 1 1 ${cx + r} ${cy}`;
+    else { const x0 = cx + r * Math.cos(a0), y0 = cy + r * Math.sin(a0), x1 = cx + r * Math.cos(a1), y1 = cy + r * Math.sin(a1); d = `M ${x0.toFixed(3)} ${y0.toFixed(3)} A ${r} ${r} 0 ${(a1 - a0) > Math.PI ? 1 : 0} 1 ${x1.toFixed(3)} ${y1.toFixed(3)}`; }
+    path.setAttribute('d', d); path.setAttribute('stroke', s.color); path.setAttribute('tabindex', '0'); path.setAttribute('aria-label', `${s.name} ${pct(total ? s.value / total * 100 : 0, 1)}`);
+    path.dataset.key = s.key; if (state.highlight === s.key) path.classList.add('on');
+    const show = ev => focusSlice(s.key, ev, true);
+    path.addEventListener('pointerenter', show); path.addEventListener('pointermove', show); path.addEventListener('focus', show);
+    path.addEventListener('pointerleave', hideTip); path.addEventListener('blur', hideTip);
+    path.addEventListener('click', () => toggleHl(s.key));
+    path.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleHl(s.key); } });
+    svg.append(path); a += ang;
+  }
+  wrap.prepend(svg);
+  renderCenter();
+  const lg = $('#legend'); lg.replaceChildren();
+  for (const s of S) {
+    const item = h('div', { class: 'leg' + (state.highlight === s.key ? ' on' : ''), role: 'button', tabindex: '0', title: s.other ? s.other.join(', ') : s.name },
+      h('span', { class: 'k', style: `background:${s.color}` }), h('span', { class: 'n', text: s.name }), h('span', { class: 'p', text: pct(total ? s.value / total * 100 : 0, 1) }), h('span', { class: 'v', text: money(s.value, 0) }));
+    item.addEventListener('pointerenter', () => focusSlice(s.key, null, false)); item.addEventListener('pointerleave', hideTip);
+    item.addEventListener('click', () => toggleHl(s.key)); item.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleHl(s.key); } });
+    lg.append(item);
+  }
+}
+function typeBadge(p) { if (p.type === 'etf') return h('span', { class: 'badge', text: 'ETP' }); if (p.type === 'crypto') return h('span', { class: 'badge', text: 'crypto' }); if (p.type === 'cash') return h('span', { class: 'badge', text: 'cash' }); return null; }
+function renderTable(c) {
+  const tb = $('#tbl tbody'); tb.replaceChildren();
+  const hs = state.highlight ? (state._slices.find(x => x.key === state.highlight) || { ids: [] }).ids : null; const hl = hs ? new Set(hs) : null;
+  for (const r of c.rows) {
+    const p = r.p;
+    const tr = h('tr', { dataset: { id: p.id }, class: [hl && hl.has(p.id) ? 'hl' : '', hl && !hl.has(p.id) ? 'dim' : '', p.flag ? 'flag' : ''].filter(Boolean).join(' ') });
+    const color = state._sliceColor.get(p.id) || 'transparent';
+    const nm = p.name || (r.q && r.q.name) || '';
+    tr.append(h('td', {}, h('div', { class: 'tk' }, h('span', { class: 'k', style: `background:${color}` }), h('span', { text: p.ticker }), typeBadge(p)), nm ? h('div', { class: 'nm', text: nm, title: nm }) : null));
+    tr.append(h('td', { text: p.type === 'cash' ? '–' : units(p.units) }));
+    tr.append(h('td', { text: r.avg != null ? price(r.avg) : '–' }));
+    tr.append(h('td', { text: r.cost != null ? money(r.cost) : '–' }));
+    const pc = h('td');
+    if (p.type === 'cash') pc.textContent = '–';
+    else {
+      pc.append(h('span', { class: r.stale ? 'mut' : '', text: r.pr != null ? price(r.pr) : '–' }));
+      const sub = [];
+      if (r.stale) sub.push('sena kaina' + (p.lastPriceAt ? ' · ' + String(p.lastPriceAt).slice(0, 10) : ''));
+      else if (r.q) {
+        if (r.q.chgPct != null) sub.push(h('span', { class: cls(r.q.chgPct), text: pct(r.q.chgPct, 2, true) }));
+        if (r.q.ext && r.q.ext.price != null && Math.abs(r.q.ext.price - r.q.price) > 1e-9) sub.push(` · ${extLabel(r.q)} ${price(r.q.ext.price)}`);
+        if (r.q.currency && r.q.currency !== 'USD') sub.push(h('span', { class: 'neg', text: ' · ' + r.q.currency + '!' }));
+      } else if (state.quoteErrors[p.id]) sub.push(h('span', { class: 'neg', text: 'klaida: ' + state.quoteErrors[p.id] }));
+      else sub.push('…');
+      pc.append(h('span', { class: 'sub' }, ...sub));
+    }
+    tr.append(pc);
+    tr.append(h('td', { text: r.value != null ? money(r.value) : '–' }));
+    const plc = h('td', { class: cls(r.pl) });
+    if (r.pl != null) plc.append(money(r.pl, 2, true), h('span', { class: 'sub', text: pct(r.plPct, 1, true) })); else plc.textContent = '–';
+    tr.append(plc);
+    tr.append(h('td', { text: pct(r.pct, 2) }));
+    tr.append(h('td', { class: 'note', text: p.note || '' }));
+    if (state.edit) tr.append(h('td', {}, h('div', { class: 'acts' }, h('button', { class: 'ib', title: 'Redaguoti', text: '✎', onClick: () => modalEdit(p) }), h('button', { class: 'ib del', title: 'Pašalinti', text: '✕', onClick: () => confirmDelete(p) }))));
+    tb.append(tr);
+  }
+  const tf = $('#tbl tfoot'); tf.replaceChildren(h('tr', {},
+    h('td', { text: 'Viso' }), h('td'), h('td'), h('td', { text: money(c.costSum) }), h('td'),
+    h('td', { text: money(c.total) }), h('td', { class: cls(c.plSum), text: money(c.plSum, 2, true) }), h('td', { text: '100%' }), h('td'), state.edit ? h('td') : null));
+  $('.acts-h').classList.toggle('hidden', !state.edit);
+  $('#rowsInfo').textContent = `${c.rows.length} eilutės · rūšiuota pagal vertę`;
+}
+function renderFoot() {
+  const d = state.data;
+  $('#foot').replaceChildren(
+    `Kainos: akcijos/ETP - Yahoo Finance per spot-api (US realtime, LSE/Xetra pagal biržos delay), crypto - CoinGecko (~1 min). Duomenys: `,
+    h('a', { href: `https://github.com/${CONFIG.owner}/${CONFIG.repo}/blob/${CONFIG.branch}/${CONFIG.path}`, target: '_blank', rel: 'noopener', text: `${CONFIG.repo}/${CONFIG.path}` }),
+    d.updated ? ` · paskutinis įrašas ${String(d.updated).replace('T', ' ').slice(0, 16)} UTC` : '');
+}
+
+/* ---------- modalai ---------- */
+const modals = [];
+function openModal(title, body, actions, onClose) {
+  const m = h('div', { class: 'modal', role: 'dialog', 'aria-modal': 'true' }, h('h3', { text: title }), body, h('div', { class: 'm-acts' }, ...actions));
+  const ov = h('div', { class: 'overlay' }, m);
+  ov.addEventListener('click', e => { if (e.target === ov) closeModal(); });
+  $('#modalRoot').append(ov); modals.push({ ov, onClose });
+  if (modals.length === 1) document.addEventListener('keydown', escClose);
+  const f = m.querySelector('input,select,textarea'); if (f) setTimeout(() => f.focus(), 30);
+  return ov;
+}
+function escClose(e) { if (e.key === 'Escape') closeModal(); }
+function closeModal() {
+  const top = modals.pop(); if (!top) return; top.ov.remove(); if (top.onClose) top.onClose();
+  if (!modals.length) document.removeEventListener('keydown', escClose);
+}
+function field(label, input) { return h('div', { class: 'f' }, h('label', { text: label }), input); }
+function inp(attrs) { return h('input', { autocomplete: 'off', ...attrs }); }
+function saveBtn() { return h('button', { class: 'btn primary', text: 'Išsaugoti į GitHub' }); }
+function busy(b, on) { b.disabled = on; b.textContent = on ? 'Saugoma…' : 'Išsaugoti į GitHub'; }
+function cancelBtn() { return h('button', { class: 'btn', text: 'Atšaukti', onClick: () => closeModal() }); }
+
+function modalBuy() {
+  const d = state.data;
+  const dl = h('datalist', { id: 'dlT' }, ...d.positions.filter(p => p.type !== 'cash').map(p => h('option', { value: p.ticker })));
+  const iT = inp({ placeholder: 'pvz. NVDA, BTC', list: 'dlT', style: 'text-transform:uppercase' });
+  const sType = h('select', {}, h('option', { value: 'stock', text: 'Akcija' }), h('option', { value: 'etf', text: 'ETF / ETP' }), h('option', { value: 'crypto', text: 'Crypto' }));
+  const iName = inp({ placeholder: 'nebūtina' });
+  const iU = inp({ inputmode: 'decimal', placeholder: 'kiekis' }), iP = inp({ inputmode: 'decimal', placeholder: 'kaina už vnt' }), iS = inp({ inputmode: 'decimal', placeholder: 'suma' });
+  const iSrc = inp({ placeholder: 'Yahoo simbolis (US = tickeris, LSE = .L, Xetra = .DE)' });
+  const bCheck = h('button', { class: 'btn sm', type: 'button', text: 'Tikrinti' });
+  const res = h('div', { class: 'res', text: 'Kainos šaltinis: akcijoms/ETP - Yahoo simbolis, crypto - CoinGecko id (mygtukas „Ieškoti" suranda).' });
+  const iNote = inp({ placeholder: 'nebūtina' });
+  const cashPos = d.positions.find(p => p.type === 'cash');
+  const chk = h('input', { type: 'checkbox', checked: true });
+  let lock = false;
+  const sync = from => { if (lock) return; lock = true; const u = num(iU.value), p = num(iP.value), s = num(iS.value); if (from !== 's') { if (isFinite(u) && isFinite(p)) iS.value = round(u * p, 2); } else if (isFinite(u) && u > 0 && isFinite(s)) iP.value = round(s / u, 6); lock = false; };
+  iU.addEventListener('input', () => sync('u')); iP.addEventListener('input', () => sync('p')); iS.addEventListener('input', () => sync('s'));
+  const onType = () => { const c = sType.value === 'crypto'; iSrc.placeholder = c ? 'CoinGecko id (pvz. bitcoin)' : 'Yahoo simbolis (US = tickeris, LSE = .L, Xetra = .DE)'; bCheck.textContent = c ? 'Ieškoti' : 'Tikrinti'; };
+  sType.addEventListener('change', onType);
+  iT.addEventListener('change', () => {
+    const t = iT.value.trim().toUpperCase(); iT.value = t;
+    const ex = d.positions.find(p => p.ticker.toUpperCase() === t && p.type !== 'cash');
+    if (ex) { sType.value = ex.type; onType(); iName.value = ex.name || ''; iSrc.value = ex.yahoo || ex.coingecko || ''; res.textContent = `Esama pozicija: ${ex.ticker} · ${units(ex.units)} vnt · investuota ${money(ex.cost)} - pirkimas bus pridėtas, avg persiskaičiuos.`; }
+    else if (!iSrc.value && sType.value !== 'crypto') iSrc.value = t;
+  });
+  bCheck.addEventListener('click', async () => {
+    res.textContent = 'Tikrinu…';
+    try {
+      if (sType.value === 'crypto') {
+        const q = (iSrc.value || iT.value).trim(); if (!q) throw new Error('įrašyk tickerį arba id');
+        const r = await fetch(`${CONFIG.coingecko}/search?query=${encodeURIComponent(q)}`); if (!r.ok) throw new Error('CoinGecko HTTP ' + r.status);
+        const coins = ((await r.json()).coins || []).slice(0, 6);
+        res.replaceChildren(coins.length ? 'Pasirink: ' : 'Nerasta');
+        for (const c of coins) res.append(h('button', { type: 'button', text: `${String(c.symbol).toUpperCase()} · ${c.name} (${c.id})`, onClick: () => { iSrc.value = c.id; if (!iName.value) iName.value = c.name; res.textContent = 'CoinGecko id: ' + c.id; } }));
+      } else {
+        const s = (iSrc.value || iT.value).trim().toUpperCase(); if (!s) throw new Error('įrašyk simbolį');
+        const r = await fetch(`${apiUrl()}?symbols=${encodeURIComponent(s)}`, { cache: 'no-store' }); const j = await r.json();
+        const q = j.quotes && j.quotes[s]; if (!q) throw new Error((j.errors && j.errors[s]) || j.error || 'nerasta');
+        iSrc.value = s; if (!iName.value && q.name) iName.value = q.name;
+        res.textContent = `${s}: ${q.name || ''} · ${price(q.price)} ${q.currency || ''} · ${q.exchange || ''}` + (q.currency && q.currency !== 'USD' ? ' · DĖMESIO: ne USD kotiruotė' : '');
+      }
+    } catch (e) { res.textContent = 'Klaida: ' + e.message; }
+  });
+  const body = h('div', {}, dl,
+    h('div', { class: 'row2' }, field('Tickeris', iT), field('Tipas', sType)),
+    field('Pavadinimas', iName),
+    h('div', { class: 'row3' }, field('Kiekis', iU), field('Kaina už vnt ($)', iP)),
+    field('Suma ($)', iS),
+    h('div', { class: 'rowb' }, field('Kainų šaltinis', iSrc), h('div', { class: 'f' }, h('label', { text: ' ' }), bCheck)),
+    res, field('Pastaba', iNote),
+    cashPos ? h('label', { class: 'chk' }, chk, `Nuskaityti sumą iš „${cashPos.ticker}" (dabar ${money(cashPos.value)})`) : null);
+  const save = saveBtn();
+  save.addEventListener('click', async () => {
+    try {
+      const t = iT.value.trim().toUpperCase(); const u = num(iU.value), s = num(iS.value);
+      if (!t) throw new Error('Nėra tickerio'); if (!(u > 0)) throw new Error('Kiekis turi būti > 0'); if (!(s >= 0)) throw new Error('Suma neteisinga');
+      const src = iSrc.value.trim(); if (!src) throw new Error(sType.value === 'crypto' ? 'Reikia CoinGecko id (spausk „Ieškoti")' : 'Reikia Yahoo simbolio');
+      const next = clone(d); let p = next.positions.find(x => x.ticker.toUpperCase() === t && x.type !== 'cash'); let msg;
+      if (p) { p.units = round((+p.units || 0) + u, 8); p.cost = round((+p.cost || 0) + s, 2); if (iNote.value.trim()) p.note = iNote.value.trim(); msg = `Pirkimas: ${t} +${units(u)} vnt uz ${money(s)}`; }
+      else {
+        p = { id: uniqueId(next, t), ticker: t, name: iName.value.trim() || undefined, type: sType.value, units: round(u, 8), cost: round(s, 2) };
+        if (sType.value === 'crypto') p.coingecko = src; else p.yahoo = src.toUpperCase();
+        if (iNote.value.trim()) p.note = iNote.value.trim();
+        next.positions.push(p); msg = `Nauja pozicija: ${t} ${units(u)} vnt uz ${money(s)}`;
+      }
+      if (cashPos && chk.checked) { const c = next.positions.find(x => x.id === cashPos.id); if (c) c.value = round((+c.value || 0) - s, 2); }
+      busy(save, true); const sha = await saveData(next, msg); closeModal(); toast('Išsaugota · commit ' + sha.slice(0, 7));
+    } catch (e) { busy(save, false); toast(e.message, true); }
+  });
+  openModal('Pirkimas / nauja pozicija', body, [cancelBtn(), save]);
+}
+
+function modalDeposit() {
+  const d = state.data; const cashPos = d.positions.find(p => p.type === 'cash');
+  const iD = inp({ type: 'date', value: today() }), iA = inp({ inputmode: 'decimal', placeholder: 'pvz. 1200' }), iN = inp({ placeholder: 'nebūtina' });
+  const chk = h('input', { type: 'checkbox', checked: true });
+  const body = h('div', {}, h('div', { class: 'row2' }, field('Data', iD), field('Suma ($)', iA)), field('Pastaba', iN),
+    cashPos ? h('label', { class: 'chk' }, chk, `Pridėti sumą į „${cashPos.ticker}" (dabar ${money(cashPos.value)})`) : null,
+    h('p', { class: 'hint', text: `Dabar investuota: ${money(sumDep(d), 0)}. Neigiama suma = išsiėmimas.` }));
+  const save = saveBtn();
+  save.addEventListener('click', async () => {
+    try {
+      const a = num(iA.value); if (!isFinite(a) || a === 0) throw new Error('Įrašyk sumą');
+      const next = clone(d); const date = iD.value || today();
+      next.deposits.push({ id: 'd' + Date.now().toString(36), date, amount: round(a, 2), note: iN.value.trim() || undefined });
+      if (cashPos && chk.checked) { const c = next.positions.find(x => x.id === cashPos.id); if (c) c.value = round((+c.value || 0) + a, 2); }
+      busy(save, true); const sha = await saveData(next, `Inasas: ${money(a, 2, true)} (${date})`); closeModal(); toast('Išsaugota · commit ' + sha.slice(0, 7));
+    } catch (e) { busy(save, false); toast(e.message, true); }
+  });
+  openModal('Įnašas', body, [cancelBtn(), save]);
+}
+
+function modalDeposits() {
+  const d = state.data; const list = h('div', { class: 'list' });
+  const deps = [...d.deposits].sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+  for (const x of deps) {
+    list.append(h('div', { class: 'li' }, h('span', { class: 'mut', text: x.date || '–' }), h('span', { class: 'n', text: x.note || '', title: x.note || '' }), h('span', { class: 'a ' + cls(x.amount), text: money(x.amount, 2, true) }),
+      state.edit ? h('button', { class: 'ib del', title: 'Pašalinti', text: '✕', onClick: async () => {
+        if (!confirm(`Pašalinti įnašą ${money(x.amount)} (${x.date})?`)) return;
+        try { const next = clone(d); next.deposits = next.deposits.filter(y => y.id !== x.id); const sha = await saveData(next, `Inasas pasalintas: ${money(x.amount)} (${x.date})`); closeModal(); toast('Išsaugota · commit ' + sha.slice(0, 7)); }
+        catch (e) { toast(e.message, true); }
+      } }) : h('span')));
+  }
+  if (!deps.length) list.append(h('p', { class: 'hint', text: 'Įnašų dar nėra.' }));
+  openModal(`Įnašai · viso ${money(sumDep(d), 0)}`, list, [h('button', { class: 'btn', text: 'Užverti', onClick: () => closeModal() })]);
+}
+
+function modalEdit(p0) {
+  const d = state.data;
+  const iT = inp({ value: p0.ticker }), iName = inp({ value: p0.name || '' });
+  const sType = h('select', {}, ...[['stock', 'Akcija'], ['etf', 'ETF / ETP'], ['crypto', 'Crypto'], ['cash', 'Cash / fiksuota vertė']].map(([v, t]) => h('option', { value: v, text: t }))); sType.value = p0.type || 'stock';
+  const iU = inp({ inputmode: 'decimal', value: p0.units != null ? p0.units : '' }), iC = inp({ inputmode: 'decimal', value: p0.cost != null ? p0.cost : '' });
+  const iAvg = inp({ inputmode: 'decimal', value: (p0.units && p0.cost != null) ? round(p0.cost / p0.units, 6) : '' });
+  const iV = inp({ inputmode: 'decimal', value: p0.value != null ? p0.value : '' });
+  const iSrc = inp({ value: p0.yahoo || p0.coingecko || '' }), iNote = inp({ value: p0.note || '' });
+  const chkF = h('input', { type: 'checkbox' }); chkF.checked = !!p0.flag;
+  let lock = false;
+  const fromAvg = () => { if (lock) return; lock = true; const u = num(iU.value), a = num(iAvg.value); if (isFinite(u) && isFinite(a)) iC.value = round(u * a, 2); lock = false; };
+  const fromCost = () => { if (lock) return; lock = true; const u = num(iU.value), c = num(iC.value); if (isFinite(u) && u > 0 && isFinite(c)) iAvg.value = round(c / u, 6); lock = false; };
+  iAvg.addEventListener('input', fromAvg); iC.addEventListener('input', fromCost); iU.addEventListener('input', fromCost);
+  const priced = h('div', {}, h('div', { class: 'row3' }, field('Kiekis', iU), field('Avg kaina ($)', iAvg)), field('Investuota suma ($)', iC), field('Kainų šaltinis (Yahoo simbolis / CoinGecko id)', iSrc));
+  const cashF = h('div', {}, field('Vertė ($)', iV));
+  const upd = () => { const c = sType.value === 'cash'; priced.classList.toggle('hidden', c); cashF.classList.toggle('hidden', !c); }; sType.addEventListener('change', upd); upd();
+  const body = h('div', {}, h('div', { class: 'row2' }, field('Tickeris', iT), field('Tipas', sType)), field('Pavadinimas', iName), priced, cashF, field('Pastaba', iNote), h('label', { class: 'chk' }, chkF, 'Pažymėti eilutę (geltona)'),
+    p0.lastPriceAt ? h('p', { class: 'hint', text: `Paskutinė įrašyta kaina: ${price(p0.lastPrice)} (${String(p0.lastPriceAt).slice(0, 16).replace('T', ' ')} UTC)` }) : null);
+  const save = saveBtn();
+  save.addEventListener('click', async () => {
+    try {
+      const next = clone(d); const p = next.positions.find(x => x.id === p0.id); if (!p) throw new Error('Pozicija nerasta');
+      const t = iT.value.trim(); if (!t) throw new Error('Nėra tickerio');
+      p.ticker = t; p.name = iName.value.trim() || undefined; p.type = sType.value; p.note = iNote.value.trim() || undefined; p.flag = chkF.checked || undefined;
+      if (p.type === 'cash') {
+        const v = num(iV.value); if (!isFinite(v)) throw new Error('Vertė neteisinga');
+        p.value = round(v, 2); delete p.units; delete p.cost; delete p.yahoo; delete p.coingecko; delete p.lastPrice; delete p.lastPriceAt;
+      } else {
+        const u = num(iU.value), c = num(iC.value); if (!(u > 0)) throw new Error('Kiekis turi būti > 0'); if (!(c >= 0)) throw new Error('Investuota suma neteisinga');
+        const src = iSrc.value.trim(); if (!src) throw new Error('Reikia kainų šaltinio');
+        p.units = round(u, 8); p.cost = round(c, 2); delete p.value;
+        if (p.type === 'crypto') { p.coingecko = src; delete p.yahoo; } else { p.yahoo = src.toUpperCase(); delete p.coingecko; }
+      }
+      busy(save, true); const sha = await saveData(next, `Redaguota: ${t}`); closeModal(); toast('Išsaugota · commit ' + sha.slice(0, 7));
+    } catch (e) { busy(save, false); toast(e.message, true); }
+  });
+  openModal('Redaguoti: ' + p0.ticker, body, [cancelBtn(), save]);
+}
+
+async function confirmDelete(p) {
+  if (!confirm(`Pašalinti poziciją ${p.ticker}? (istorija lieka GitHub commit'uose)`)) return;
+  try { const next = clone(state.data); next.positions = next.positions.filter(x => x.id !== p.id); const sha = await saveData(next, `Pasalinta pozicija: ${p.ticker}`); toast('Išsaugota · commit ' + sha.slice(0, 7)); }
+  catch (e) { toast(e.message, true); }
+}
+
+function download() {
+  const blob = new Blob([JSON.stringify(state.data, null, 2)], { type: 'application/json' }); const a = h('a', { href: URL.createObjectURL(blob), download: 'positions.json' }); document.body.append(a); a.click(); a.remove();
+}
+function modalSettings(required) {
+  return new Promise(resolve => {
+    let done = false; const finish = v => { if (!done) { done = true; resolve(v); } };
+    const iP = inp({ type: 'password', placeholder: 'github_pat_…', value: state.pat || '' });
+    const body = h('div', {}, field('GitHub fine-grained token', iP),
+      h('div', { class: 'hint' },
+        required ? h('p', { text: 'Kad išsaugotum pakeitimus, reikia GitHub token (vieną kartą šiame įrenginyje).' }) : null,
+        h('p', { text: 'Kaip susikurti (2 min):' }),
+        h('ol', {},
+          h('li', {}, 'Atidaryk ', h('a', { href: 'https://github.com/settings/personal-access-tokens/new', target: '_blank', rel: 'noopener', text: 'github.com/settings/personal-access-tokens/new' })),
+          h('li', { text: `Repository access → Only select repositories → ${CONFIG.owner}/${CONFIG.repo}` }),
+          h('li', { text: 'Permissions → Repository permissions → Contents → Read and write' }),
+          h('li', { text: 'Expiration - ilgiausia; Generate token; nukopijuok ir įklijuok čia' })),
+        h('p', { text: 'Token saugomas tik šios naršyklės localStorage ir siunčiamas tik į api.github.com.' }),
+        h('p', {}, h('a', { href: '#', text: 'Atsisiųsti positions.json kopiją', onClick: e => { e.preventDefault(); download(); } }))));
+    const save = h('button', { class: 'btn primary', text: 'Išsaugoti' });
+    save.addEventListener('click', () => {
+      state.pat = iP.value.trim();
+      try { if (state.pat) localStorage.setItem('spot.pat', state.pat); else localStorage.removeItem('spot.pat'); } catch (e) {}
+      finish(!!state.pat); closeModal(); toast(state.pat ? 'Token išsaugotas šiame įrenginyje' : 'Token pašalintas');
+    });
+    const rm = h('button', { class: 'btn danger left', text: 'Pašalinti token', onClick: () => { state.pat = ''; try { localStorage.removeItem('spot.pat'); } catch (e) {} finish(false); closeModal(); toast('Token pašalintas'); } });
+    openModal('Nustatymai', body, [rm, h('button', { class: 'btn', text: 'Atšaukti', onClick: () => { finish(false); closeModal(); } }), save], () => finish(false));
+  });
+}
+
+/* ---------- UI events ---------- */
+$('#btnRefresh').addEventListener('click', () => refreshQuotes(true));
+$('#btnEdit').addEventListener('click', () => {
+  state.edit = !state.edit; $('#btnEdit').classList.toggle('on', state.edit); $('#toolbar').classList.toggle('hidden', !state.edit); renderAll();
+  if (state.edit && !state.pat) toast('Įvesk GitHub token (⚙), kad galėtum išsaugoti pakeitimus');
+});
+$('#btnSettings').addEventListener('click', () => modalSettings(false));
+$('#btnBuy').addEventListener('click', modalBuy);
+$('#btnDeposit').addEventListener('click', modalDeposit);
+$('#btnDeposits').addEventListener('click', modalDeposits);
+$('#btnClearHl').addEventListener('click', () => { state.highlight = null; renderAll(); });
+$('#allocSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; state.allocMode = b.dataset.m; state.highlight = null; $('#allocSeg').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); renderAll(); });
+
+(async function init() {
+  try { await loadPositions(); }
+  catch (e) { $('#kpis').append(h('div', { class: 'err-box', text: 'Nepavyko įkelti pozicijų: ' + e.message })); return; }
+  renderAll(); refreshQuotes(false);
+})();
+</script>
+</body>
+</html>

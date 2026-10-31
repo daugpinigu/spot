@@ -1,0 +1,6 @@
+{
+  "functions": { "api/quotes.js": { "maxDuration": 15, "memory": 256 } },
+  "headers": [
+    { "source": "/api/(.*)", "headers": [ { "key": "Access-Control-Allow-Origin", "value": "*" } ] }
+  ]
+}

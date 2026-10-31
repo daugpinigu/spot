@@ -1,0 +1,6 @@
+{
+  "name": "spot",
+  "private": true,
+  "description": "daug_pinigu Spot portfelis - gyvos kainos, pozicijos, pyragas",
+  "engines": { "node": "22.x" }
+}
