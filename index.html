@@ -96,7 +96,7 @@ footer{color:var(--muted);font-size:11.5px;margin-top:10px;line-height:1.6}foote
 .err-box{background:rgba(239,106,106,.1);border:1px solid rgba(239,106,106,.4);border-radius:8px;padding:12px 14px;color:#ffd9d9;font-size:13px;grid-column:1/-1}
 @media (max-width:980px){.kpis{grid-template-columns:repeat(3,1fr)}}
 @media (max-width:760px){.alloc{grid-template-columns:1fr;gap:16px}.legend{grid-template-columns:1fr}.donut-wrap{width:240px;height:240px}}
-@media (max-width:560px){.kpis{grid-template-columns:1fr 1fr}.kpi .v{font-size:20px}h1{font-size:22px}.row2,.row3{grid-template-columns:1fr}.card{padding:14px}.twrap{margin:0 -14px;padding:0 14px}table{min-width:0;font-size:12px}td{padding:7px 6px}th{padding:7px 6px;font-size:10px}th:nth-child(3),td:nth-child(3),th:nth-child(4),td:nth-child(4),th:nth-child(8),td:nth-child(8),th:nth-child(9),td:nth-child(9){display:none}.nm{max-width:120px}.badge{display:none}}
+@media (max-width:560px){.kpis{grid-template-columns:1fr 1fr}.kpi .v{font-size:20px}h1{font-size:22px}.row2,.row3{grid-template-columns:1fr}.card{padding:14px}.twrap{margin:0 -14px;padding:0 14px}table{min-width:0;font-size:12px}td{padding:7px 6px}th{padding:7px 6px;font-size:10px}th:nth-child(3),td:nth-child(3),th:nth-child(4),td:nth-child(4),th:nth-child(8),td:nth-child(8),th:nth-child(9),td:nth-child(9){display:none}.nm,.badge,.ext{display:none}}
 </style>
 </head>
 <body>
@@ -492,7 +492,7 @@ function renderTable(c) {
       if (r.stale) sub.push('sena kaina' + (p.lastPriceAt ? ' · ' + String(p.lastPriceAt).slice(0, 10) : ''));
       else if (r.q) {
         if (r.q.chgPct != null) sub.push(h('span', { class: cls(r.q.chgPct), text: pct(r.q.chgPct, 2, true) }));
-        if (r.q.ext && r.q.ext.price != null && Math.abs(r.q.ext.price - r.q.price) > 1e-9) sub.push(` · ${extLabel(r.q)} ${price(r.q.ext.price)}`);
+        if (r.q.ext && r.q.ext.price != null && Math.abs(r.q.ext.price - r.q.price) > 1e-9) sub.push(h('span', { class: 'ext', text: ` · ${extLabel(r.q)} ${price(r.q.ext.price)}` }));
         if (r.q.currency && r.q.currency !== 'USD') sub.push(h('span', { class: 'neg', text: ' · ' + r.q.currency + '!' }));
       } else if (state.quoteErrors[p.id]) sub.push(h('span', { class: 'neg', text: 'klaida: ' + state.quoteErrors[p.id] }));
       else sub.push('…');
