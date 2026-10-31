@@ -57,6 +57,15 @@ h1{font-size:28px;font-weight:800;letter-spacing:-.5px;line-height:1.1}
 .leg{display:grid;grid-template-columns:12px 1fr auto auto;align-items:center;gap:10px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:13px;border:1px solid transparent}
 .leg:hover{background:rgba(255,255,255,.04)}.leg.on{background:rgba(45,212,191,.08);border-color:rgba(45,212,191,.35)}
 .leg .k{width:12px;height:12px;border-radius:3px}.leg .n{color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.leg .p{font-weight:700;font-variant-numeric:tabular-nums}.leg .v{color:var(--muted);font-variant-numeric:tabular-nums;font-size:12px}
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.filters input{appearance:none;background:#0a1628;border:1px solid var(--line2);color:var(--text);border-radius:8px;padding:7px 10px;font-size:13px;font-family:inherit;min-width:200px;flex:1 1 200px;max-width:340px}
+.filters input:focus{outline:none;border-color:var(--accent)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.fchip{appearance:none;border:1px solid var(--line2);background:transparent;color:var(--text2);border-radius:999px;padding:5px 11px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+.fchip:hover{border-color:var(--accent)}.fchip.on{border-color:var(--accent);color:var(--accent);background:rgba(45,212,191,.08)}
+.sortsel{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-left:auto}
+.sortsel select{appearance:none;background:#0a1628;border:1px solid var(--line2);color:var(--text);border-radius:8px;padding:6px 26px 6px 10px;font-size:12px;font-family:inherit;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%236b8197' stroke-width='2'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center}
+th.sortable{cursor:pointer;user-select:none}th.sortable:hover{color:var(--text)}th.active{color:var(--accent)}th .arr{display:inline-block;width:10px;margin-left:3px;font-size:9px}
 .twrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -18px;padding:0 18px}
 table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums;min-width:900px}
 th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;font-weight:600;text-align:right;padding:8px 10px;border-bottom:1px solid var(--line2);white-space:nowrap}
@@ -96,7 +105,7 @@ footer{color:var(--muted);font-size:11.5px;margin-top:10px;line-height:1.6}foote
 .err-box{background:rgba(239,106,106,.1);border:1px solid rgba(239,106,106,.4);border-radius:8px;padding:12px 14px;color:#ffd9d9;font-size:13px;grid-column:1/-1}
 @media (max-width:980px){.kpis{grid-template-columns:repeat(3,1fr)}}
 @media (max-width:760px){.alloc{grid-template-columns:1fr;gap:16px}.legend{grid-template-columns:1fr}.donut-wrap{width:240px;height:240px}}
-@media (max-width:560px){.kpis{grid-template-columns:1fr 1fr}.kpi .v{font-size:20px}h1{font-size:22px}.row2,.row3{grid-template-columns:1fr}.card{padding:14px}.twrap{margin:0 -14px;padding:0 14px}table{min-width:0;font-size:12px}td{padding:7px 6px}th{padding:7px 6px;font-size:10px}th:nth-child(3),td:nth-child(3),th:nth-child(4),td:nth-child(4),th:nth-child(8),td:nth-child(8),th:nth-child(9),td:nth-child(9){display:none}.nm,.badge,.ext{display:none}}
+@media (max-width:560px){.sortsel{margin-left:0}.kpis{grid-template-columns:1fr 1fr}.kpi .v{font-size:20px}h1{font-size:22px}.row2,.row3{grid-template-columns:1fr}.card{padding:14px}.twrap{margin:0 -14px;padding:0 14px}table{min-width:0;font-size:12px}td{padding:7px 6px}th{padding:7px 6px;font-size:10px}th:nth-child(3),td:nth-child(3),th:nth-child(4),td:nth-child(4),th:nth-child(8),td:nth-child(8),th:nth-child(9),td:nth-child(9){display:none}.nm,.badge,.ext{display:none}}
 </style>
 </head>
 <body>
@@ -130,6 +139,12 @@ footer{color:var(--muted);font-size:11.5px;margin-top:10px;line-height:1.6}foote
 
   <section class="card">
     <div class="card-h"><h2>Pozicijos</h2><span class="mut" id="rowsInfo" style="font-size:12px"></span></div>
+    <div class="filters">
+      <input id="fq" type="search" placeholder="Ieškoti: tickeris, pavadinimas, pastaba" autocomplete="off" aria-label="Ieškoti">
+      <div class="chips" id="ftypes"></div>
+      <label class="sortsel">Rūšiuoti <select id="fsort" aria-label="Rūšiavimas"></select></label>
+      <button class="btn sm hidden" id="fReset">&#10005; Išvalyti</button>
+    </div>
     <div class="toolbar hidden" id="toolbar">
       <button class="btn primary sm" id="btnBuy">+ Pirkimas / nauja pozicija</button>
       <button class="btn sm" id="btnDeposit">+ Įnašas</button>
@@ -138,7 +153,7 @@ footer{color:var(--muted);font-size:11.5px;margin-top:10px;line-height:1.6}foote
     </div>
     <div class="twrap">
       <table id="tbl">
-        <thead><tr><th>Tickeris</th><th>Vnt</th><th>Avg kaina</th><th>Investuota</th><th>Kaina</th><th>Vertė</th><th>P/L</th><th>%</th><th class="note">Pastaba</th><th class="acts-h hidden"></th></tr></thead>
+        <thead><tr><th class="sortable" data-k="ticker">Tickeris<span class="arr"></span></th><th class="sortable" data-k="units">Vnt<span class="arr"></span></th><th class="sortable" data-k="avg">Avg kaina<span class="arr"></span></th><th class="sortable" data-k="cost">Investuota<span class="arr"></span></th><th class="sortable" data-k="chg" title="Rūšiuoja pagal dienos pokytį %">Kaina (Δ dienos)<span class="arr"></span></th><th class="sortable" data-k="value">Vertė<span class="arr"></span></th><th class="sortable" data-k="pl" title="Rūšiuoja pagal P/L $; P/L % - per „Rūšiuoti“">P/L<span class="arr"></span></th><th class="sortable" data-k="pct">%<span class="arr"></span></th><th class="note">Pastaba</th><th class="acts-h hidden"></th></tr></thead>
         <tbody></tbody><tfoot></tfoot>
       </table>
     </div>
@@ -160,11 +175,26 @@ const PALETTE = ['#3987e5','#d95926','#199e70','#c98500','#d55181','#008300','#9
 const OTHER = '#6b8197';
 const TYPE_NAMES = { stock: 'Akcijos', etf: 'ETF / ETP', crypto: 'Crypto', cash: 'Cash' };
 const TYPE_ORDER = ['stock', 'etf', 'crypto', 'cash'];
+const SORT_KEYS = {
+  value: { label: 'Vertė', get: r => r.value },
+  ticker: { label: 'Tickeris', get: r => String(r.p.ticker || '').toLowerCase(), str: true },
+  units: { label: 'Vnt', get: r => r.p.type === 'cash' ? null : r.p.units },
+  avg: { label: 'Avg kaina', get: r => r.avg },
+  cost: { label: 'Investuota', get: r => r.cost },
+  price: { label: 'Kaina', get: r => r.pr },
+  chg: { label: 'Dienos pokytis %', get: r => (r.q && !r.stale && r.q.chgPct != null) ? r.q.chgPct : null },
+  day: { label: 'Dienos pokytis $', get: r => r.day },
+  pl: { label: 'P/L $', get: r => r.pl },
+  plPct: { label: 'P/L %', get: r => r.plPct },
+  pct: { label: '% portfelio', get: r => r.pct },
+};
 
 const state = {
   data: null, sha: null, source: null,
   quotes: {}, quoteErrors: {}, lastQuoteAt: null, lastAttempt: 0, lastErr: null, inflight: false,
   edit: false, allocMode: 'pos', highlight: null,
+  sort: (() => { try { const s = JSON.parse(localStorage.getItem('spot.sort') || 'null'); if (s && s.key && s.dir) return s; } catch (e) {} return { key: 'value', dir: 'desc' }; })(),
+  filter: { q: '', types: new Set() },
   pat: (() => { try { return localStorage.getItem('spot.pat') || ''; } catch (e) { return ''; } })(),
   _slices: [], _sliceColor: new Map(), _total: 0, _c: null,
 };
@@ -355,6 +385,28 @@ function compute() {
   };
 }
 
+/* ---------- rūšiavimas / filtras ---------- */
+function sortRows(rows) {
+  const k = SORT_KEYS[state.sort.key] || SORT_KEYS.value; const dir = state.sort.dir === 'asc' ? 1 : -1;
+  return [...rows].sort((a, b) => {
+    const va = k.get(a), vb = k.get(b);
+    const na = va == null || (typeof va === 'number' && !isFinite(va)), nb = vb == null || (typeof vb === 'number' && !isFinite(vb));
+    if (na && nb) return 0; if (na) return 1; if (nb) return -1;
+    if (k.str) return va < vb ? -dir : va > vb ? dir : 0;
+    return (va - vb) * dir;
+  });
+}
+function filterRows(rows) {
+  const q = state.filter.q.trim().toLowerCase(); const ts = state.filter.types;
+  return rows.filter(r => (!ts.size || ts.has(r.p.type || 'stock')) && (!q || String(r.p.ticker || '').toLowerCase().includes(q) || (r.p.name || '').toLowerCase().includes(q) || (r.p.note || '').toLowerCase().includes(q)));
+}
+function setSort(key, dir) {
+  if (!SORT_KEYS[key]) key = 'value';
+  state.sort = { key, dir: dir === 'asc' ? 'asc' : 'desc' };
+  try { localStorage.setItem('spot.sort', JSON.stringify(state.sort)); } catch (e) {}
+  if (state._c) renderTable(state._c);
+}
+
 /* ---------- render ---------- */
 function renderAll() { if (!state.data) return; const c = compute(); state._c = c; renderStatus(); renderKPIs(c); renderDonut(c); renderTable(c); renderFoot(); }
 
@@ -475,7 +527,8 @@ function typeBadge(p) { if (p.type === 'etf') return h('span', { class: 'badge',
 function renderTable(c) {
   const tb = $('#tbl tbody'); tb.replaceChildren();
   const hs = state.highlight ? (state._slices.find(x => x.key === state.highlight) || { ids: [] }).ids : null; const hl = hs ? new Set(hs) : null;
-  for (const r of c.rows) {
+  const shown = sortRows(filterRows(c.rows)); const filtered = shown.length !== c.rows.length;
+  for (const r of shown) {
     const p = r.p;
     const tr = h('tr', { dataset: { id: p.id }, class: [hl && hl.has(p.id) ? 'hl' : '', hl && !hl.has(p.id) ? 'dim' : '', p.flag ? 'flag' : ''].filter(Boolean).join(' ') });
     const color = state._sliceColor.get(p.id) || 'transparent';
@@ -508,11 +561,16 @@ function renderTable(c) {
     if (state.edit) tr.append(h('td', {}, h('div', { class: 'acts' }, h('button', { class: 'ib', title: 'Redaguoti', text: '✎', onClick: () => modalEdit(p) }), h('button', { class: 'ib del', title: 'Pašalinti', text: '✕', onClick: () => confirmDelete(p) }))));
     tb.append(tr);
   }
+  const f = { cost: shown.reduce((s, r) => s + (r.cost || 0), 0), value: shown.reduce((s, r) => s + (r.value || 0), 0), pl: shown.reduce((s, r) => s + (r.pl || 0), 0), pct: shown.reduce((s, r) => s + (r.pct || 0), 0) };
   const tf = $('#tbl tfoot'); tf.replaceChildren(h('tr', {},
-    h('td', { text: 'Viso' }), h('td'), h('td'), h('td', { text: money(c.costSum) }), h('td'),
-    h('td', { text: money(c.total) }), h('td', { class: cls(c.plSum), text: money(c.plSum, 2, true) }), h('td', { text: '100%' }), h('td'), state.edit ? h('td') : null));
+    h('td', { text: filtered ? `Viso (atrinkta ${shown.length})` : 'Viso' }), h('td'), h('td'), h('td', { text: money(f.cost) }), h('td'),
+    h('td', { text: money(f.value) }), h('td', { class: cls(f.pl), text: money(f.pl, 2, true) }), h('td', { text: pct(f.pct, filtered ? 2 : 0) }), h('td'), state.edit ? h('td') : null));
   $('.acts-h').classList.toggle('hidden', !state.edit);
-  $('#rowsInfo').textContent = `${c.rows.length} eilutės · rūšiuota pagal vertę`;
+  const sk = SORT_KEYS[state.sort.key] || SORT_KEYS.value;
+  $('#rowsInfo').textContent = (filtered ? `${shown.length} iš ${c.rows.length} eilučių` : `${c.rows.length} eilutės`) + ` · rūšiuota: ${sk.label} ${state.sort.dir === 'asc' ? '↑' : '↓'}`;
+  document.querySelectorAll('#tbl thead th.sortable').forEach(th => { const on = th.dataset.k === state.sort.key; th.classList.toggle('active', on); th.setAttribute('aria-sort', on ? (state.sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'); th.querySelector('.arr').textContent = on ? (state.sort.dir === 'asc' ? '▲' : '▼') : ''; });
+  const fs = $('#fsort'); if (fs && fs.options.length) fs.value = state.sort.key + ':' + state.sort.dir;
+  $('#fReset').classList.toggle('hidden', !(state.filter.q || state.filter.types.size));
 }
 function renderFoot() {
   const d = state.data;
@@ -735,6 +793,21 @@ $('#btnBuy').addEventListener('click', modalBuy);
 $('#btnDeposit').addEventListener('click', modalDeposit);
 $('#btnDeposits').addEventListener('click', modalDeposits);
 $('#btnClearHl').addEventListener('click', () => { state.highlight = null; renderAll(); });
+(function setupFilters() {
+  const sel = $('#fsort');
+  for (const [k, v] of Object.entries(SORT_KEYS)) sel.append(h('option', { value: k + ':desc', text: v.label + ' ↓' }), h('option', { value: k + ':asc', text: v.label + ' ↑' }));
+  sel.value = state.sort.key + ':' + state.sort.dir;
+  sel.addEventListener('change', () => { const [k, d] = sel.value.split(':'); setSort(k, d); });
+  const chips = $('#ftypes');
+  for (const t of TYPE_ORDER) {
+    const b = h('button', { class: 'fchip', type: 'button', text: TYPE_NAMES[t], dataset: { t } });
+    b.addEventListener('click', () => { if (state.filter.types.has(t)) state.filter.types.delete(t); else state.filter.types.add(t); b.classList.toggle('on', state.filter.types.has(t)); if (state._c) renderTable(state._c); });
+    chips.append(b);
+  }
+  $('#fq').addEventListener('input', () => { state.filter.q = $('#fq').value; if (state._c) renderTable(state._c); });
+  $('#fReset').addEventListener('click', () => { state.filter.q = ''; $('#fq').value = ''; state.filter.types.clear(); chips.querySelectorAll('.fchip').forEach(b => b.classList.remove('on')); if (state._c) renderTable(state._c); });
+  $('#tbl thead').addEventListener('click', e => { const th = e.target.closest('th.sortable'); if (!th) return; const k = th.dataset.k; if (state.sort.key === k) setSort(k, state.sort.dir === 'asc' ? 'desc' : 'asc'); else setSort(k, SORT_KEYS[k] && SORT_KEYS[k].str ? 'asc' : 'desc'); });
+})();
 $('#allocSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; state.allocMode = b.dataset.m; state.highlight = null; $('#allocSeg').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); renderAll(); });
 
 (async function init() {
