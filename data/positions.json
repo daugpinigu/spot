@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-11-03T13:37:21.039Z",
+  "updated": "2026-11-03T13:37:40.616Z",
   "currency": "USD",
   "quotesApi": "https://spot-api-two.vercel.app/api/quotes",
   "deposits": [
@@ -9,6 +9,11 @@
       "date": "2026-10-31",
       "amount": 59419,
       "note": "Pradinis likutis is Google Sheets (K24: 48570+1249+8x1200)"
+    },
+    {
+      "id": "dmw0qfz37",
+      "date": "2026-11-03",
+      "amount": 1200
     }
   ],
   "positions": [
@@ -83,7 +88,7 @@
       "ticker": "Cash",
       "name": "Laisvi pinigai",
       "type": "cash",
-      "value": 3263.6
+      "value": 4463.6
     },
     {
       "id": "bmnr",
@@ -439,7 +444,9 @@
       "type": "stock",
       "units": 100,
       "cost": 2694,
-      "yahoo": "IREN"
+      "yahoo": "IREN",
+      "lastPrice": 22.02,
+      "lastPriceAt": "2026-11-02T21:00:02.000Z"
     }
   ]
 }
